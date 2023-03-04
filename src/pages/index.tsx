@@ -2,11 +2,18 @@ import Head from 'next/head'
 import { atom, useAtom } from 'jotai'
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from '@tanstack/react-table'
+import BarLoader from 'react-spinners/BarLoader'
 import { F } from 'ts-toolbelt'
 import { z } from 'zod'
-import BarLoader from 'react-spinners/BarLoader'
 import styles from '@/styles/Home.module.css'
 import { COUNTRIES_MAP } from '@/countries'
+import { useReducer, useState } from 'react'
 
 type DriverLine = {
   name: string
@@ -37,9 +44,7 @@ const driverSchema = z.object({
 type Driver = z.infer<typeof driverSchema>
 
 const params = { limit: '100' }
-async function fetchF1Data<T>(
-  endpoint: string
-): Promise<T> {
+async function fetchF1Data(endpoint: string) {
   try {
     const response = await axios.get(
       `${baseUrl}${endpoint}.json`,
@@ -57,7 +62,7 @@ async function getDriverStandings(
   season: Season
 ): Promise<Driver[]> {
   try {
-    const drivers = await fetchF1Data<any>(
+    const drivers = await fetchF1Data(
       `${season}/driverStandings`
     )
     return drivers.MRData.StandingsTable.StandingsLists[0]
@@ -68,9 +73,14 @@ async function getDriverStandings(
   }
 }
 
-async function getSeasonList() {
+const seasonSchema = z.object({
+  season: z.string(),
+  url: z.string(),
+})
+type Seasons = z.infer<typeof seasonSchema>
+async function getSeasonList(): Promise<Seasons[]> {
   try {
-    const seasons = await fetchF1Data<any>('seasons')
+    const seasons = await fetchF1Data('seasons')
     return seasons.MRData.SeasonTable.Seasons
   } catch (error) {
     console.error(`Error: ${error}`)
@@ -81,12 +91,6 @@ async function getSeasonList() {
 async function getCountryFlagFromNationality(
   nationality: string
 ) {
-  if (
-    nationality === undefined ||
-    nationality === null ||
-    nationality === ''
-  )
-    return ''
   try {
     const response = await axios.get(
       `https://countryflagsapi.com/svg/${COUNTRIES_MAP[nationality]}`
@@ -120,7 +124,7 @@ const SeasonList = () => {
           placeholder={`${year}`}
           defaultValue={year}
         >
-          {data.map(({ season }: { season: number }) => (
+          {data?.map(({ season }) => (
             <option key={season}>{season}</option>
           ))}
         </select>
@@ -129,34 +133,27 @@ const SeasonList = () => {
   )
 }
 
-type DriverRowProps = {
-  firstName: string
-  lastName: string
-  nationality: string
-  position: string
+type DriverRowStats = {
+  position: Pick<Driver, 'position'>
+  name: Pick<Driver['Driver'], 'givenName'> &
+    Pick<Driver['Driver'], 'familyName'>
+  wins: Pick<Driver, 'wins'>
 }
-const DriverRow = ({
-  firstName,
-  lastName,
-  nationality,
-  position,
-}: DriverRowProps) => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['flag'],
-    queryFn: () =>
-      getCountryFlagFromNationality(nationality),
-  })
-
-  return (
-    <div className="flex">
-      <p>
-        {position}
-        {'. '}
-        {firstName} {lastName}
-      </p>
-    </div>
-  )
-}
+const columnHelper = createColumnHelper<DriverRowStats>()
+const columns = [
+  columnHelper.accessor('position', {
+    cell: (info) => info.getValue(),
+    header: () => 'Position',
+  }),
+  columnHelper.accessor('name', {
+    cell: (info) => info.getValue(),
+    header: () => 'Name',
+  }),
+  columnHelper.accessor('wins', {
+    cell: (info) => info.getValue(),
+    header: () => 'Wins',
+  }),
+]
 
 export default function Home() {
   const [year] = useAtom(yearAtom)
@@ -172,8 +169,6 @@ export default function Home() {
       </div>
     )
   if (error) return <p>Error! :((((</p>
-
-  console.log(data)
 
   return (
     <>
@@ -193,22 +188,79 @@ export default function Home() {
         <h1 className="text-7xl">{year}</h1>
         <SeasonList />
         <div>
-          {data?.map((item, index) => {
-            const { givenName, familyName, nationality } =
-              item.Driver
-            return (
-              <div key={index}>
-                <DriverRow
-                  firstName={givenName}
-                  lastName={familyName}
-                  nationality={nationality}
-                  position={item.position}
-                />
-              </div>
-            )
-          })}
+          <DriverRow defaultData={data} />
         </div>
       </main>
     </>
+  )
+}
+
+type DriverRow = {
+  Constructors: Array<{
+    constructorId: string
+    name: string
+    nationality: string
+  }>
+  Driver: Driver['Driver']
+  points: Driver['points']
+  position: Driver['position']
+  wins: Driver['wins']
+}
+
+const formatDriverRow = (driverRow: DriverRow[]) =>
+  driverRow.map(
+    ({
+      position,
+      Driver: { givenName, familyName },
+      wins,
+    }) => ({
+      position,
+      name: `${givenName} ${familyName}`,
+      wins,
+    })
+  )
+
+const DriverRow = ({ defaultData }: any) => {
+  const data = formatDriverRow(defaultData)
+  const table = useReactTable({
+    // @ts-ignore
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
+  return (
+    <table>
+      <thead>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <tr key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <th key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+              </th>
+            ))}
+          </tr>
+        ))}
+      </thead>
+      <tbody>
+        {table.getRowModel().rows.map((row) => (
+          <tr key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <td key={cell.id}>
+                {flexRender(
+                  cell.column.columnDef.cell,
+                  cell.getContext()
+                )}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
