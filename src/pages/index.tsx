@@ -139,22 +139,18 @@ type DriverRowStats = {
 const columnHelper = createColumnHelper<DriverRowStats>()
 const columns = [
   columnHelper.accessor('position', {
-    size: 1000,
     cell: (info) => info.getValue(),
     header: () => 'Pos',
   }),
   columnHelper.accessor('name', {
-    size: 1000,
     cell: (info) => info.getValue(),
     header: () => 'Name',
   }),
   columnHelper.accessor('wins', {
-    size: 1000,
     cell: (info) => info.getValue(),
     header: () => 'Wins',
   }),
   columnHelper.accessor('points', {
-    size: 1000,
     cell: (info) => info.getValue(),
     header: () => 'Points',
   }),
@@ -197,8 +193,7 @@ export default function Home() {
       <main className={styles.main}>
         <h1 className="text-7xl">{year}</h1>
         <SeasonList />
-        <div>
-          <Filters />
+        <div className="w-full max-w-4xl">
           <DriverRow defaultData={data} />
         </div>
       </main>
@@ -290,12 +285,12 @@ const DriverRow = ({
   )
 
   return (
-    <table>
+    <table className="w-full">
       <thead>
         {table.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
-              <th key={header.id}>
+              <th key={header.id} className="text-left">
                 {header.isPlaceholder
                   ? null
                   : flexRender(
