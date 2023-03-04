@@ -25,7 +25,7 @@ const date = new Date()
 const currentYear = date.getFullYear()
 const yearAtom = atom(currentYear)
 
-const baseUrl = 'http://ergast.com/api/f1/'
+const baseUrl = 'https://ergast.com/api/f1/'
 
 const driverSchema = z.object({
   Driver: z.object({
