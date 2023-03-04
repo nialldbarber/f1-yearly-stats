@@ -110,17 +110,21 @@ const SeasonList = () => {
   if (error) return <p>Error! :((((</p>
 
   return (
-    <div className="relative w-full lg:max-w-sm">
-      <select
-        className="w-full p-2.5 text-gray-500 bg-white border rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
-        onChange={(e) => setYear(parseInt(e.target.value))}
-        placeholder={`${year}`}
-        defaultValue={year}
-      >
-        {data.map(({ season }: { season: number }) => (
-          <option key={season}>{season}</option>
-        ))}
-      </select>
+    <div className="absolute left-10 w-32">
+      <div className="relative w-full lg:max-w-sm">
+        <select
+          className="w-full p-2.5 text-gray-500 bg-white border rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
+          onChange={(e) =>
+            setYear(parseInt(e.target.value))
+          }
+          placeholder={`${year}`}
+          defaultValue={year}
+        >
+          {data.map(({ season }: { season: number }) => (
+            <option key={season}>{season}</option>
+          ))}
+        </select>
+      </div>
     </div>
   )
 }
@@ -129,11 +133,13 @@ type DriverRowProps = {
   firstName: string
   lastName: string
   nationality: string
+  position: string
 }
 const DriverRow = ({
   firstName,
   lastName,
   nationality,
+  position,
 }: DriverRowProps) => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['flag'],
@@ -142,12 +148,10 @@ const DriverRow = ({
   })
 
   return (
-    <div style={{ display: 'flex' }}>
-      <div
-        style={{ width: 20, height: 20 }}
-        dangerouslySetInnerHTML={{ __html: data }}
-      />
+    <div className="flex">
       <p>
+        {position}
+        {'. '}
         {firstName} {lastName}
       </p>
     </div>
@@ -161,8 +165,15 @@ export default function Home() {
     queryFn: () => getDriverStandings(year),
   })
 
-  if (isLoading) return <BarLoader color="#FFF" />
+  if (isLoading)
+    return (
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <BarLoader color="#FFF" />
+      </div>
+    )
   if (error) return <p>Error! :((((</p>
+
+  console.log(data)
 
   return (
     <>
@@ -179,6 +190,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+        <h1 className="text-7xl">{year}</h1>
         <SeasonList />
         <div>
           {data?.map((item, index) => {
@@ -190,6 +202,7 @@ export default function Home() {
                   firstName={givenName}
                   lastName={familyName}
                   nationality={nationality}
+                  position={item.position}
                 />
               </div>
             )
