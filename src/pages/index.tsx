@@ -227,6 +227,14 @@ const formatDriverRow = (driverRow: DriverRow[]) =>
     })
   )
 
+const getClassName = (index: number) => {
+  let className: string = ''
+  if (index === 0) className += 'text-red-400'
+  else if (index === 1) className += 'text-orange-400'
+  else if (index === 2) className += 'text-yellow-400'
+  return className
+}
+
 const DriverRow = ({ defaultData }: any) => {
   const data = formatDriverRow(defaultData)
   const table = useReactTable({
@@ -255,8 +263,8 @@ const DriverRow = ({ defaultData }: any) => {
         ))}
       </thead>
       <tbody>
-        {table.getRowModel().rows.map((row) => (
-          <tr key={row.id}>
+        {table.getRowModel().rows.map((row, index) => (
+          <tr key={row.id} className={getClassName(index)}>
             {row.getVisibleCells().map((cell) => (
               <td key={cell.id}>
                 {flexRender(
