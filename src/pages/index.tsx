@@ -140,6 +140,7 @@ const DriverRow = ({
     queryFn: () =>
       getCountryFlagFromNationality(nationality),
   })
+
   return (
     <div style={{ display: 'flex' }}>
       <div
