@@ -139,18 +139,22 @@ type DriverRowStats = {
 const columnHelper = createColumnHelper<DriverRowStats>()
 const columns = [
   columnHelper.accessor('position', {
+    size: 1000,
     cell: (info) => info.getValue(),
     header: () => 'Pos',
   }),
   columnHelper.accessor('name', {
+    size: 1000,
     cell: (info) => info.getValue(),
     header: () => 'Name',
   }),
   columnHelper.accessor('wins', {
+    size: 1000,
     cell: (info) => info.getValue(),
     header: () => 'Wins',
   }),
   columnHelper.accessor('points', {
+    size: 1000,
     cell: (info) => info.getValue(),
     header: () => 'Points',
   }),
@@ -268,7 +272,7 @@ function isDriverRookie() {
 const DriverRow = ({
   defaultData,
 }: {
-  defaultData: DriverRow[]
+  defaultData: any
 }) => {
   const data = useMemo(
     () => formatDriverRow(defaultData),
