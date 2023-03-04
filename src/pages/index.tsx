@@ -13,11 +13,7 @@ import { F } from 'ts-toolbelt'
 import { z } from 'zod'
 import styles from '@/styles/Home.module.css'
 import { COUNTRIES_MAP } from '@/countries'
-import { useReducer, useState } from 'react'
-
-type DriverLine = {
-  name: string
-}
+import { useMemo, useReducer, useState } from 'react'
 
 type Season = number
 
@@ -144,7 +140,7 @@ const columnHelper = createColumnHelper<DriverRowStats>()
 const columns = [
   columnHelper.accessor('position', {
     cell: (info) => info.getValue(),
-    header: () => 'Position',
+    header: () => 'Pos',
   }),
   columnHelper.accessor('name', {
     cell: (info) => info.getValue(),
@@ -169,11 +165,16 @@ export default function Home() {
 
   if (isLoading)
     return (
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+      <div className="flex items-center justify-center h-screen w-screen">
         <BarLoader color="#FFF" />
       </div>
     )
-  if (error) return <p>Error! :((((</p>
+  if (error)
+    return (
+      <p className="flex items-center justify-center h-screen w-screen text-9xl">
+        Error! :((((
+      </p>
+    )
 
   return (
     <>
@@ -193,10 +194,19 @@ export default function Home() {
         <h1 className="text-7xl">{year}</h1>
         <SeasonList />
         <div>
+          <Filters />
           <DriverRow defaultData={data} />
         </div>
       </main>
     </>
+  )
+}
+
+const Filters = () => {
+  return (
+    <div>
+      <p>filters go here</p>
+    </div>
   )
 }
 
@@ -227,7 +237,11 @@ const formatDriverRow = (driverRow: DriverRow[]) =>
     })
   )
 
-const getClassName = (index: number) => {
+function getClassName(
+  index: number,
+  hasSeasonBegun: boolean
+) {
+  if (!hasSeasonBegun) return ''
   let className: string = ''
   if (index === 0) className += 'text-red-400'
   else if (index === 1) className += 'text-orange-400'
@@ -235,14 +249,41 @@ const getClassName = (index: number) => {
   return className
 }
 
-const DriverRow = ({ defaultData }: any) => {
-  const data = formatDriverRow(defaultData)
+function hasSeasonBegun(season: DriverRow[]) {
+  return Boolean(
+    season.reduce(
+      (total, current) => total + parseInt(current.points),
+      0
+    )
+  )
+}
+
+function isDriverRookie() {
+  // get all seasons (from beginning to now)
+  // does this driver appear only once?
+  // if so - they are a rookie
+  // if not, they're a vet
+}
+
+const DriverRow = ({
+  defaultData,
+}: {
+  defaultData: DriverRow[]
+}) => {
+  const data = useMemo(
+    () => formatDriverRow(defaultData),
+    [defaultData]
+  )
   const table = useReactTable({
     // @ts-ignore
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
+  const hasBegun = useMemo(
+    () => hasSeasonBegun(defaultData),
+    [defaultData]
+  )
 
   return (
     <table>
@@ -264,7 +305,10 @@ const DriverRow = ({ defaultData }: any) => {
       </thead>
       <tbody>
         {table.getRowModel().rows.map((row, index) => (
-          <tr key={row.id} className={getClassName(index)}>
+          <tr
+            key={row.id}
+            className={getClassName(index, hasBegun)}
+          >
             {row.getVisibleCells().map((cell) => (
               <td key={cell.id}>
                 {flexRender(
