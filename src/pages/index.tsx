@@ -138,6 +138,7 @@ type DriverRowStats = {
   name: Pick<Driver['Driver'], 'givenName'> &
     Pick<Driver['Driver'], 'familyName'>
   wins: Pick<Driver, 'wins'>
+  points: Pick<Driver, 'points'>
 }
 const columnHelper = createColumnHelper<DriverRowStats>()
 const columns = [
@@ -152,6 +153,10 @@ const columns = [
   columnHelper.accessor('wins', {
     cell: (info) => info.getValue(),
     header: () => 'Wins',
+  }),
+  columnHelper.accessor('points', {
+    cell: (info) => info.getValue(),
+    header: () => 'Points',
   }),
 ]
 
@@ -213,10 +218,12 @@ const formatDriverRow = (driverRow: DriverRow[]) =>
       position,
       Driver: { givenName, familyName },
       wins,
+      points,
     }) => ({
       position,
       name: `${givenName} ${familyName}`,
       wins,
+      points,
     })
   )
 
