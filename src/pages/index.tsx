@@ -1,4 +1,4 @@
-import { useMemo, useReducer, useState } from 'react'
+import { useMemo } from 'react'
 import Head from 'next/head'
 import { atom, useAtom } from 'jotai'
 import axios from 'axios'
@@ -133,6 +133,7 @@ type DriverRowStats = {
   position: Pick<Driver, 'position'>
   name: Pick<Driver['Driver'], 'givenName'> &
     Pick<Driver['Driver'], 'familyName'>
+  team: string
   wins: Pick<Driver, 'wins'>
   points: Pick<Driver, 'points'>
 }
@@ -146,6 +147,10 @@ const columns = [
     cell: (info) => info.getValue(),
     header: () => 'Name',
   }),
+  columnHelper.accessor('team', {
+    cell: (info) => info.getValue(),
+    header: () => 'Team',
+  }),
   columnHelper.accessor('wins', {
     cell: (info) => info.getValue(),
     header: () => 'Wins',
@@ -157,7 +162,7 @@ const columns = [
 ]
 
 export default function Home() {
-  const [year] = useAtom(yearAtom)
+  const [year, setYear] = useAtom(yearAtom)
   const { data, isLoading, error } = useQuery({
     queryKey: ['drivers', year],
     queryFn: () => getDriverStandings(year),
@@ -195,19 +200,11 @@ export default function Home() {
       <main className={styles.main}>
         <h1 className="text-7xl">{year}</h1>
         <SeasonList />
-        <div className="w-full max-w-4xl">
+        <div className="w-full max-w-4xl mt-8">
           <DriverRow defaultData={data} />
         </div>
       </main>
     </>
-  )
-}
-
-const Filters = () => {
-  return (
-    <div>
-      <p>filters go here</p>
-    </div>
   )
 }
 
@@ -228,11 +225,13 @@ const formatDriverRow = (driverRow: DriverRow[]) =>
     ({
       position,
       Driver: { givenName, familyName },
+      Constructors,
       wins,
       points,
     }) => ({
       position,
       name: `${givenName} ${familyName}`,
+      team: Constructors[0]?.name,
       wins,
       points,
     })
@@ -265,6 +264,8 @@ function isDriverRookie() {
   // if so - they are a rookie
   // if not, they're a vet
 }
+
+function hideYearIfNotStarted() {}
 
 const DriverRow = ({
   defaultData,
