@@ -1,3 +1,4 @@
+import { useMemo, useReducer, useState } from 'react'
 import Head from 'next/head'
 import { atom, useAtom } from 'jotai'
 import axios from 'axios'
@@ -13,7 +14,6 @@ import { F } from 'ts-toolbelt'
 import { z } from 'zod'
 import styles from '@/styles/Home.module.css'
 import { COUNTRIES_MAP } from '@/countries'
-import { useMemo, useReducer, useState } from 'react'
 
 type Season = number
 
@@ -163,6 +163,8 @@ export default function Home() {
     queryFn: () => getDriverStandings(year),
   })
 
+  console.log(data)
+
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-screen w-screen">
@@ -273,16 +275,16 @@ const DriverRow = ({
     () => formatDriverRow(defaultData),
     [defaultData]
   )
+  const hasBegun = useMemo(
+    () => hasSeasonBegun(defaultData),
+    [defaultData]
+  )
   const table = useReactTable({
     // @ts-ignore
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
-  const hasBegun = useMemo(
-    () => hasSeasonBegun(defaultData),
-    [defaultData]
-  )
 
   return (
     <table className="w-full">
