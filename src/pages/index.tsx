@@ -341,6 +341,8 @@ function calculateWinningPercentage(season: DriverRow[]) {
   return winningPercentage.toFixed(2)
 }
 
+function calculateWinningMarginPercentage() {}
+
 export function SeasonStats({ data }: any) {
   const winningPercentage = calculateWinningPercentage(data)
   return (
