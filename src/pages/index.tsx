@@ -28,13 +28,20 @@ const yearAtom = atom(currentYear)
 
 function calculateWinningPercentage(season: Driver[]) {
   let winningPercentage: number
+  const {
+    wins,
+    Driver: { givenName, familyName },
+  } = season[0]
   let firstPlaceWins = parseInt(season[0].wins)
   let totalRaces = season.reduce(
     (total, current) => total + parseInt(current.wins),
     0
   )
   winningPercentage = (firstPlaceWins / totalRaces) * 100
-  return winningPercentage.toFixed(2)
+  return {
+    winningPercentage: winningPercentage.toFixed(2),
+    driver: `${givenName} ${familyName}`,
+  }
 }
 
 function calculateWinningMarginPercentage() {}
@@ -341,14 +348,18 @@ const DriverRow = ({
 
 export function SeasonStats({ data }: { data: Driver[] }) {
   console.log('SeasonStats', data)
-  const winningPercentage = calculateWinningPercentage(data)
+  const { driver, winningPercentage } =
+    calculateWinningPercentage(data)
   return (
     <div>
-      <p className="text-5xl">Stats</p>
+      <p className="text-5xl mb-7">Stats</p>
       <div>
         <ul>
           {winningPercentage && (
-            <li>Winning percentage {winningPercentage}%</li>
+            <li>
+              {driver}s winning percentage:{' '}
+              {winningPercentage}%
+            </li>
           )}
         </ul>
       </div>
