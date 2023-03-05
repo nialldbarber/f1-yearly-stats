@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import Head from 'next/head'
-import { atom, useAtom } from 'jotai'
+import { atom, PrimitiveAtom, useAtom } from 'jotai'
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -84,6 +84,14 @@ function hasSeasonBegun(season: Driver[]) {
       0
     )
   )
+}
+
+const MAP_PRESENT: Record<string, string> = {
+  was: 'is',
+}
+
+const MAP_PAST: Record<string, string> = {
+  is: 'was',
 }
 
 function isDriverRookie() {
@@ -374,6 +382,18 @@ const DriverRow = ({
   )
 }
 
+const Title = ({ text }: { text: string }) => (
+  <p className="text-xl font-bold">{text}</p>
+)
+
+const formatTense = (year: any, word: string) => {
+  const currentYear = getYear()
+  if (year === currentYear) {
+    return MAP_PRESENT[word]
+  }
+  return MAP_PAST[word]
+}
+
 export function SeasonStats({ data }: { data: Driver[] }) {
   const { hasBegun } = useHasSeasonBegun(data)
   const { driver, winningPercentage } =
@@ -388,15 +408,18 @@ export function SeasonStats({ data }: { data: Driver[] }) {
           <ul>
             {winningPercentage && (
               <li className="my-3">
-                {driver}s winning percentage:{' '}
+                <Title text="Winning Percentage" />
+                <i>{driver}s</i> winning percentage{' '}
+                {formatTense(yearAtom, 'is')}{' '}
                 <span className="text-red-400">
                   {winningPercentage}%
                 </span>
               </li>
             )}
-
             <li className="my-3">
-              {first}s winning margin over {second} was{' '}
+              <Title text="Winning Margin" />
+              <i>{first}s</i> winning margin over{' '}
+              <i>{second}</i> {formatTense(yearAtom, 'is')}{' '}
               <span className="text-red-400">
                 {percentage}%
               </span>
