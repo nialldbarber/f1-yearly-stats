@@ -189,7 +189,7 @@ const SeasonList = () => {
   if (error) return <p>Error! :((((</p>
 
   return (
-    <div className="absolute left-10 w-32">
+    <div className="fixed left-10 bottom-10 w-32 z-10">
       <div className="relative w-full lg:max-w-sm">
         <select
           className="w-full p-2.5 text-gray-500 bg-white border rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
@@ -309,9 +309,9 @@ function getClassName(
 ) {
   if (!hasSeasonBegun) return ''
   let className: string = ''
-  if (index === 0) className += 'text-red-400'
-  else if (index === 1) className += 'text-orange-400'
-  else if (index === 2) className += 'text-yellow-400'
+  if (index === 0) className += 'text-gold'
+  else if (index === 1) className += 'text-silver'
+  else if (index === 2) className += 'text-bronze'
   return className
 }
 
@@ -333,12 +333,15 @@ const DriverRow = ({
   })
 
   return (
-    <table className="w-full">
+    <table className="w-full relative">
       <thead>
         {table.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
-              <th key={header.id} className="text-left">
+              <th
+                key={header.id}
+                className="text-left sticky top-0"
+              >
                 {header.isPlaceholder
                   ? null
                   : flexRender(
@@ -384,14 +387,15 @@ export function SeasonStats({ data }: { data: Driver[] }) {
         <div>
           <ul>
             {winningPercentage && (
-              <li>
+              <li className="my-3">
                 {driver}s winning percentage:{' '}
                 <span className="text-red-400">
                   {winningPercentage}%
                 </span>
               </li>
             )}
-            <li>
+
+            <li className="my-3">
               {first}s winning margin over {second} was{' '}
               <span className="text-red-400">
                 {percentage}%
