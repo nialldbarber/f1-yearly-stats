@@ -31,8 +31,9 @@ function getNthPlace(nth: number, season: Driver[]) {
   const {
     wins,
     Driver: { givenName, familyName },
+    points,
   } = season[nth]
-  return { wins, givenName, familyName }
+  return { wins, points, givenName, familyName }
 }
 
 function calculateWinningPercentage(season: Driver[]) {
@@ -57,18 +58,18 @@ function calculateWinningMarginPercentage(
   season: Driver[]
 ) {
   const {
-    wins: firstWins,
+    points: firstPoints,
     givenName: firstGivenName,
     familyName: firstFamilyName,
   } = getNthPlace(0, season)
   const {
-    wins: secondWins,
+    points: secondPoints,
     givenName: secondGivenName,
     familyName: secondFamilyName,
   } = getNthPlace(1, season)
-  let difference = n(firstWins) - n(secondWins)
-  let totalWins = n(firstWins) + n(secondWins)
-  let percentage = (difference / totalWins) * 100
+  let difference = n(firstPoints) - n(secondPoints)
+  let totalPoints = n(firstPoints) + n(secondPoints)
+  let percentage = (difference / totalPoints) * 100
   return {
     percentage: percentage.toFixed(2),
     first: `${firstGivenName} ${firstFamilyName}`,
@@ -374,8 +375,8 @@ export function SeasonStats({ data }: { data: Driver[] }) {
   const { hasBegun } = useHasSeasonBegun(data)
   const { driver, winningPercentage } =
     calculateWinningPercentage(data)
-  const margin = calculateWinningMarginPercentage(data)
-  console.log(margin)
+  const { first, second, percentage } =
+    calculateWinningMarginPercentage(data)
   return (
     hasBegun && (
       <div>
@@ -390,6 +391,12 @@ export function SeasonStats({ data }: { data: Driver[] }) {
                 </span>
               </li>
             )}
+            <li>
+              {first}s winning margin over {second} was{' '}
+              <span className="text-red-400">
+                {percentage}%
+              </span>
+            </li>
           </ul>
         </div>
       </div>
