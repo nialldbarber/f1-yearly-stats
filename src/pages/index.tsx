@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import Head from 'next/head'
-import { atom, PrimitiveAtom, useAtom } from 'jotai'
+import { atom, useAtom } from 'jotai'
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -284,6 +284,7 @@ export default function Home() {
         <h1 className="text-7xl">{year}</h1>
         <SeasonList />
         <div className="w-full max-w-4xl mt-8">
+          {/* @ts-ignore */}
           <DriverRow defaultData={data} />
         </div>
         <div className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700 w-full mt-14" />
@@ -326,7 +327,7 @@ function getClassName(
 const DriverRow = ({
   defaultData,
 }: {
-  defaultData: any
+  defaultData: Driver[]
 }) => {
   const data = useMemo(
     () => formatDriverRow(defaultData),
