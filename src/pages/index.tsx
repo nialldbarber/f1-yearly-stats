@@ -17,8 +17,11 @@ import { COUNTRIES_MAP } from '@/countries'
 
 type Season = number
 
-const date = new Date()
-const currentYear = date.getFullYear()
+function getYear() {
+  const date = new Date()
+  return date.getFullYear()
+}
+const currentYear = getYear()
 const yearAtom = atom(currentYear)
 
 const baseUrl = 'https://ergast.com/api/f1/'
@@ -168,8 +171,6 @@ export default function Home() {
     queryFn: () => getDriverStandings(year),
   })
 
-  console.log(data)
-
   if (isLoading)
     return (
       <div className="flex items-center justify-center h-screen w-screen">
@@ -203,6 +204,8 @@ export default function Home() {
         <div className="w-full max-w-4xl mt-8">
           <DriverRow defaultData={data} />
         </div>
+        <div className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700 w-full mt-14" />
+        <SeasonStats data={data} />
       </main>
     </>
   )
@@ -220,7 +223,7 @@ type DriverRow = {
   wins: Driver['wins']
 }
 
-const formatDriverRow = (driverRow: DriverRow[]) =>
+export const formatDriverRow = (driverRow: DriverRow[]) =>
   driverRow.map(
     ({
       position,
@@ -286,6 +289,7 @@ const DriverRow = ({
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
+  console.log(defaultData)
 
   return (
     <table className="w-full">
@@ -323,5 +327,32 @@ const DriverRow = ({
         ))}
       </tbody>
     </table>
+  )
+}
+
+function calculateWinningPercentage(season: DriverRow[]) {
+  let winningPercentage: number
+  let firstPlaceWins = parseInt(season[0].wins)
+  let totalRaces = season.reduce(
+    (total, current) => total + parseInt(current.wins),
+    0
+  )
+  winningPercentage = (firstPlaceWins / totalRaces) * 100
+  return winningPercentage.toFixed(2)
+}
+
+export function SeasonStats({ data }: any) {
+  const winningPercentage = calculateWinningPercentage(data)
+  return (
+    <div>
+      <p className="text-5xl">Stats</p>
+      <div>
+        <ul>
+          {winningPercentage && (
+            <li>Winning percentage {winningPercentage}%</li>
+          )}
+        </ul>
+      </div>
+    </div>
   )
 }
