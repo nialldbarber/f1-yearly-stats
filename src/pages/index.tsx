@@ -32,7 +32,7 @@ function calculateWinningPercentage(season: Driver[]) {
     wins,
     Driver: { givenName, familyName },
   } = season[0]
-  let firstPlaceWins = parseInt(season[0].wins)
+  let firstPlaceWins = parseInt(wins)
   let totalRaces = season.reduce(
     (total, current) => total + parseInt(current.wins),
     0
@@ -295,17 +295,13 @@ const DriverRow = ({
     () => formatDriverRow(defaultData),
     [defaultData]
   )
-  const hasBegun = useMemo(
-    () => hasSeasonBegun(defaultData),
-    [defaultData]
-  )
+  const { hasBegun } = useHasSeasonBegun(defaultData)
   const table = useReactTable({
     // @ts-ignore
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
-  console.log(defaultData)
 
   return (
     <table className="w-full">
@@ -347,22 +343,35 @@ const DriverRow = ({
 }
 
 export function SeasonStats({ data }: { data: Driver[] }) {
+  const { hasBegun } = useHasSeasonBegun(data)
   console.log('SeasonStats', data)
   const { driver, winningPercentage } =
     calculateWinningPercentage(data)
   return (
-    <div>
-      <p className="text-5xl mb-7">Stats</p>
+    hasBegun && (
       <div>
-        <ul>
-          {winningPercentage && (
-            <li>
-              {driver}s winning percentage:{' '}
-              {winningPercentage}%
-            </li>
-          )}
-        </ul>
+        <p className="text-5xl mb-7">Stats</p>
+        <div>
+          <ul>
+            {winningPercentage && (
+              <li>
+                {driver}s winning percentage:{' '}
+                <span className="text-red-400">
+                  {winningPercentage}%
+                </span>
+              </li>
+            )}
+          </ul>
+        </div>
       </div>
-    </div>
+    )
   )
+}
+
+const useHasSeasonBegun = (data: Driver[]) => {
+  const hasBegun = useMemo(
+    () => hasSeasonBegun(data),
+    [data]
+  )
+  return { hasBegun }
 }
