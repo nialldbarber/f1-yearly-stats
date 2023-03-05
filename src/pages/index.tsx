@@ -17,6 +17,8 @@ import { COUNTRIES_MAP } from '@/countries'
 
 type Season = number
 
+const baseUrl = 'https://ergast.com/api/f1/'
+
 function getYear() {
   const date = new Date()
   return date.getFullYear()
@@ -24,9 +26,45 @@ function getYear() {
 const currentYear = getYear()
 const yearAtom = atom(currentYear)
 
-const baseUrl = 'https://ergast.com/api/f1/'
+function calculateWinningPercentage(season: Driver[]) {
+  let winningPercentage: number
+  let firstPlaceWins = parseInt(season[0].wins)
+  let totalRaces = season.reduce(
+    (total, current) => total + parseInt(current.wins),
+    0
+  )
+  winningPercentage = (firstPlaceWins / totalRaces) * 100
+  return winningPercentage.toFixed(2)
+}
+
+function calculateWinningMarginPercentage() {}
+
+function hasSeasonBegun(season: Driver[]) {
+  return Boolean(
+    season.reduce(
+      (total, current) => total + parseInt(current.points),
+      0
+    )
+  )
+}
+
+function isDriverRookie() {
+  // get all seasons (from beginning to now)
+  // does this driver appear only once?
+  // if so - they are a rookie
+  // if not, they're a vet
+}
+
+function hideYearIfNotStarted() {}
 
 const driverSchema = z.object({
+  Constructors: z.array(
+    z.object({
+      constructorId: z.string(),
+      name: z.string(),
+      nationality: z.string(),
+    })
+  ),
   Driver: z.object({
     code: z.string(),
     dateOfBirth: z.date(),
@@ -205,25 +243,14 @@ export default function Home() {
           <DriverRow defaultData={data} />
         </div>
         <div className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700 w-full mt-14" />
+        {/* @ts-ignore */}
         <SeasonStats data={data} />
       </main>
     </>
   )
 }
 
-type DriverRow = {
-  Constructors: Array<{
-    constructorId: string
-    name: string
-    nationality: string
-  }>
-  Driver: Driver['Driver']
-  points: Driver['points']
-  position: Driver['position']
-  wins: Driver['wins']
-}
-
-export const formatDriverRow = (driverRow: DriverRow[]) =>
+export const formatDriverRow = (driverRow: Driver[]) =>
   driverRow.map(
     ({
       position,
@@ -251,24 +278,6 @@ function getClassName(
   else if (index === 2) className += 'text-yellow-400'
   return className
 }
-
-function hasSeasonBegun(season: DriverRow[]) {
-  return Boolean(
-    season.reduce(
-      (total, current) => total + parseInt(current.points),
-      0
-    )
-  )
-}
-
-function isDriverRookie() {
-  // get all seasons (from beginning to now)
-  // does this driver appear only once?
-  // if so - they are a rookie
-  // if not, they're a vet
-}
-
-function hideYearIfNotStarted() {}
 
 const DriverRow = ({
   defaultData,
@@ -330,20 +339,8 @@ const DriverRow = ({
   )
 }
 
-function calculateWinningPercentage(season: DriverRow[]) {
-  let winningPercentage: number
-  let firstPlaceWins = parseInt(season[0].wins)
-  let totalRaces = season.reduce(
-    (total, current) => total + parseInt(current.wins),
-    0
-  )
-  winningPercentage = (firstPlaceWins / totalRaces) * 100
-  return winningPercentage.toFixed(2)
-}
-
-function calculateWinningMarginPercentage() {}
-
-export function SeasonStats({ data }: any) {
+export function SeasonStats({ data }: { data: Driver[] }) {
+  console.log('SeasonStats', data)
   const winningPercentage = calculateWinningPercentage(data)
   return (
     <div>
