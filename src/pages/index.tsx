@@ -18,6 +18,7 @@ import { COUNTRIES_MAP } from '@/countries'
 type Season = number
 
 const baseUrl = 'https://ergast.com/api/f1/'
+const n = (x: string) => parseInt(x)
 
 function getYear() {
   const date = new Date()
@@ -26,15 +27,23 @@ function getYear() {
 const currentYear = getYear()
 const yearAtom = atom(currentYear)
 
-function calculateWinningPercentage(season: Driver[]) {
-  let winningPercentage: number
+function getNthPlace(nth: number, season: Driver[]) {
   const {
     wins,
     Driver: { givenName, familyName },
-  } = season[0]
-  let firstPlaceWins = parseInt(wins)
+  } = season[nth]
+  return { wins, givenName, familyName }
+}
+
+function calculateWinningPercentage(season: Driver[]) {
+  let winningPercentage: number
+  const { wins, givenName, familyName } = getNthPlace(
+    0,
+    season
+  )
+  let firstPlaceWins = n(wins)
   let totalRaces = season.reduce(
-    (total, current) => total + parseInt(current.wins),
+    (total, current) => total + n(current.wins),
     0
   )
   winningPercentage = (firstPlaceWins / totalRaces) * 100
@@ -44,12 +53,33 @@ function calculateWinningPercentage(season: Driver[]) {
   }
 }
 
-function calculateWinningMarginPercentage() {}
+function calculateWinningMarginPercentage(
+  season: Driver[]
+) {
+  const {
+    wins: firstWins,
+    givenName: firstGivenName,
+    familyName: firstFamilyName,
+  } = getNthPlace(0, season)
+  const {
+    wins: secondWins,
+    givenName: secondGivenName,
+    familyName: secondFamilyName,
+  } = getNthPlace(1, season)
+  let difference = n(firstWins) - n(secondWins)
+  let totalWins = n(firstWins) + n(secondWins)
+  let percentage = (difference / totalWins) * 100
+  return {
+    percentage: percentage.toFixed(2),
+    first: `${firstGivenName} ${firstFamilyName}`,
+    second: `${secondGivenName} ${secondFamilyName}`,
+  }
+}
 
 function hasSeasonBegun(season: Driver[]) {
   return Boolean(
     season.reduce(
-      (total, current) => total + parseInt(current.points),
+      (total, current) => total + n(current.points),
       0
     )
   )
@@ -162,9 +192,7 @@ const SeasonList = () => {
       <div className="relative w-full lg:max-w-sm">
         <select
           className="w-full p-2.5 text-gray-500 bg-white border rounded-md shadow-sm outline-none appearance-none focus:border-indigo-600"
-          onChange={(e) =>
-            setYear(parseInt(e.target.value))
-          }
+          onChange={(e) => setYear(n(e.target.value))}
           placeholder={`${year}`}
           defaultValue={year}
         >
@@ -344,9 +372,10 @@ const DriverRow = ({
 
 export function SeasonStats({ data }: { data: Driver[] }) {
   const { hasBegun } = useHasSeasonBegun(data)
-  console.log('SeasonStats', data)
   const { driver, winningPercentage } =
     calculateWinningPercentage(data)
+  const margin = calculateWinningMarginPercentage(data)
+  console.log(margin)
   return (
     hasBegun && (
       <div>
