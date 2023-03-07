@@ -421,6 +421,19 @@ const Title = ({ text }: { text: string }) => (
   <p className="text-xl font-bold">{text}</p>
 )
 
+function formatStatStyles(percentage: string | number) {
+  let classNames = []
+  if (percentage < 2) {
+    classNames.push('text-white-400', 'text-red-400')
+    console.log()
+  } else if (percentage < 10 && 2 <= percentage) {
+    classNames.push('text-white-400', 'text-blue-400')
+  } else {
+    classNames.push('text-white-400', 'text-green-400')
+  }
+  return classNames
+}
+
 export function SeasonStats({ data }: { data: Driver[] }) {
   const [year] = useAtom(yearAtom)
   const { hasBegun } = useHasSeasonBegun(data)
@@ -429,8 +442,9 @@ export function SeasonStats({ data }: { data: Driver[] }) {
   const { first, second, percentage } =
     calculateWinningMarginPercentage(data)
 
-  if (percentage<2)
-    return (
+  const [one, two] = formatStatStyles(percentage)
+
+  return (
     hasBegun && (
       <div>
         <p className="text-5xl mb-7">Stats</p>
@@ -441,7 +455,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
                 <Title text="Winning Percentage" />
                 <i>{driver}&apos;s</i> winning percentage{' '}
                 {formatTense(year, 'is')}{' '}
-                <span className="text-white-400">
+                <span className={one}>
                   {winningPercentage}%
                 </span>
               </li>
@@ -450,78 +464,13 @@ export function SeasonStats({ data }: { data: Driver[] }) {
               <Title text="Winning Margin" />
               <i>{first}&apos;s</i> winning margin over{' '}
               <i>{second}</i> {formatTense(year, 'is')}{' '}
-              <span className="text-red-400">
-                {percentage}%
-              </span>
+              <span className={two}>{percentage}%</span>
             </li>
           </ul>
         </div>
       </div>
     )
   )
-
-  else if (percentage<10 && 2<=percentage) {
-    return (
-  hasBegun && (
-    <div>
-      <p className="text-5xl mb-7">Stats</p>
-      <div>
-        <ul>
-          {winningPercentage && (
-            <li className="my-3">
-              <Title text="Winning Percentage" />
-              <i>{driver}'s</i> winning percentage{' '}
-              {formatTense(year, 'is')}{' '}
-              <span className="text-white-400">
-                {winningPercentage}%
-              </span>
-            </li>
-          )}
-          <li className="my-3">
-            <Title text="Winning Margin" />
-            <i>{first}'s</i> winning margin over{' '}
-            <i>{second}</i> {formatTense(year, 'is')}{' '}
-            <span className="text-blue-400">
-              {percentage}%
-            </span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  )
-)
-  }
-  else {
-    return (
-  hasBegun && (
-    <div>
-      <p className="text-5xl mb-7">Stats</p>
-      <div>
-        <ul>
-          {winningPercentage && (
-            <li className="my-3">
-              <Title text="Winning Percentage" />
-              <i>{driver}'s</i> winning percentage{' '}
-              {formatTense(year, 'is')}{' '}
-              <span className="text-white-400">
-                {winningPercentage}%
-              </span>
-            </li>
-          )}
-          <li className="my-3">
-            <Title text="Winning Margin" />
-            <i>{first}'s</i> winning margin over{' '}
-            <i>{second}</i> {formatTense(year, 'is')}{' '}
-            <span className="text-green-400">
-              {percentage}%
-            </span>
-          </li>
-        </ul>
-      </div>
-    </div>
-  )
-)
-  }
 }
 
 const useHasSeasonBegun = (data: Driver[]) => {
