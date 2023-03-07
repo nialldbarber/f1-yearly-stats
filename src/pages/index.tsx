@@ -15,7 +15,6 @@ import { z } from 'zod'
 import styles from '@/styles/Home.module.css'
 import { COUNTRIES_MAP } from '@/countries'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 
 type Season = number
 
@@ -95,7 +94,7 @@ function formatName(name: string) {
 const MAP_PAST: Record<string, string> = {
   is: 'was',
 }
-const formatTense = (year: any, word: string) => {
+const formatTense = (year: number, word: string) => {
   const currentYear = getYear()
   if (year !== currentYear) {
     return MAP_PAST[word]
@@ -135,7 +134,7 @@ const driverSchema = z.object({
 })
 export type Driver = z.infer<typeof driverSchema>
 
-const params = { limit: '100' }
+const params = { limit: '400' }
 export async function fetchF1Data(endpoint: string) {
   try {
     const response = await axios.get(
