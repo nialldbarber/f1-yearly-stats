@@ -421,6 +421,19 @@ const Title = ({ text }: { text: string }) => (
   <p className="text-xl font-bold">{text}</p>
 )
 
+function formatStatStyles(percentage: string | number) {
+  let classNames = []
+  if (percentage < 2) {
+    classNames.push('text-white-400', 'text-red-400')
+    console.log()
+  } else if (percentage < 10 && 2 <= percentage) {
+    classNames.push('text-white-400', 'text-blue-400')
+  } else {
+    classNames.push('text-white-400', 'text-green-400')
+  }
+  return classNames
+}
+
 export function SeasonStats({ data }: { data: Driver[] }) {
   const [year] = useAtom(yearAtom)
   const { hasBegun } = useHasSeasonBegun(data)
@@ -428,6 +441,8 @@ export function SeasonStats({ data }: { data: Driver[] }) {
     calculateWinningPercentage(data)
   const { first, second, percentage } =
     calculateWinningMarginPercentage(data)
+
+  const [one, two] = formatStatStyles(percentage)
 
   return (
     hasBegun && (
@@ -438,20 +453,18 @@ export function SeasonStats({ data }: { data: Driver[] }) {
             {winningPercentage && (
               <li className="my-3">
                 <Title text="Winning Percentage" />
-                <i>{driver}'s</i> winning percentage{' '}
+                <i>{driver}&apos;s</i> winning percentage{' '}
                 {formatTense(year, 'is')}{' '}
-                <span className="text-red-400">
+                <span className={one}>
                   {winningPercentage}%
                 </span>
               </li>
             )}
             <li className="my-3">
               <Title text="Winning Margin" />
-              <i>{first}'s</i> winning margin over{' '}
+              <i>{first}&apos;s</i> winning margin over{' '}
               <i>{second}</i> {formatTense(year, 'is')}{' '}
-              <span className="text-red-400">
-                {percentage}%
-              </span>
+              <span className={two}>{percentage}%</span>
             </li>
           </ul>
         </div>
