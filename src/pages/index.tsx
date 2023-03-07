@@ -441,7 +441,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
                 <Title text="Winning Percentage" />
                 <i>{driver}'s</i> winning percentage{' '}
                 {formatTense(year, 'is')}{' '}
-                <span className="text-red-400">
+                <span className="text-white-400">
                   {winningPercentage}%
                 </span>
               </li>
@@ -472,7 +472,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
               <Title text="Winning Percentage" />
               <i>{driver}'s</i> winning percentage{' '}
               {formatTense(year, 'is')}{' '}
-              <span className="text-blue-400">
+              <span className="text-white-400">
                 {winningPercentage}%
               </span>
             </li>
@@ -481,7 +481,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
             <Title text="Winning Margin" />
             <i>{first}'s</i> winning margin over{' '}
             <i>{second}</i> {formatTense(year, 'is')}{' '}
-            <span className="text-green-400">
+            <span className="text-blue-400">
               {percentage}%
             </span>
           </li>
@@ -503,7 +503,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
               <Title text="Winning Percentage" />
               <i>{driver}'s</i> winning percentage{' '}
               {formatTense(year, 'is')}{' '}
-              <span className="text-red-400">
+              <span className="text-white-400">
                 {winningPercentage}%
               </span>
             </li>
