@@ -429,7 +429,8 @@ export function SeasonStats({ data }: { data: Driver[] }) {
   const { first, second, percentage } =
     calculateWinningMarginPercentage(data)
 
-  return (
+  if (percentage<2)
+    return (
     hasBegun && (
       <div>
         <p className="text-5xl mb-7">Stats</p>
@@ -458,6 +459,69 @@ export function SeasonStats({ data }: { data: Driver[] }) {
       </div>
     )
   )
+
+  else if (percentage<10 && 2<=percentage) {
+    return (
+  hasBegun && (
+    <div>
+      <p className="text-5xl mb-7">Stats</p>
+      <div>
+        <ul>
+          {winningPercentage && (
+            <li className="my-3">
+              <Title text="Winning Percentage" />
+              <i>{driver}'s</i> winning percentage{' '}
+              {formatTense(year, 'is')}{' '}
+              <span className="text-blue-400">
+                {winningPercentage}%
+              </span>
+            </li>
+          )}
+          <li className="my-3">
+            <Title text="Winning Margin" />
+            <i>{first}'s</i> winning margin over{' '}
+            <i>{second}</i> {formatTense(year, 'is')}{' '}
+            <span className="text-green-400">
+              {percentage}%
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  )
+)
+  }
+  else {
+    return (
+  hasBegun && (
+    <div>
+      <p className="text-5xl mb-7">Stats</p>
+      <div>
+        <ul>
+          {winningPercentage && (
+            <li className="my-3">
+              <Title text="Winning Percentage" />
+              <i>{driver}'s</i> winning percentage{' '}
+              {formatTense(year, 'is')}{' '}
+              <span className="text-red-400">
+                {winningPercentage}%
+              </span>
+            </li>
+          )}
+          <li className="my-3">
+            <Title text="Winning Margin" />
+            <i>{first}'s</i> winning margin over{' '}
+            <i>{second}</i> {formatTense(year, 'is')}{' '}
+            <span className="text-green-400">
+              {percentage}%
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  )
+)
+  }
 }
 
 const useHasSeasonBegun = (data: Driver[]) => {
