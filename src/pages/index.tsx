@@ -438,7 +438,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
             {winningPercentage && (
               <li className="my-3">
                 <Title text="Winning Percentage" />
-                <i>{driver}s</i> winning percentage{' '}
+                <i>{driver}'s</i> winning percentage{' '}
                 {formatTense(year, 'is')}{' '}
                 <span className="text-red-400">
                   {winningPercentage}%
@@ -447,7 +447,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
             )}
             <li className="my-3">
               <Title text="Winning Margin" />
-              <i>{first}s</i> winning margin over{' '}
+              <i>{first}'s</i> winning margin over{' '}
               <i>{second}</i> {formatTense(year, 'is')}{' '}
               <span className="text-red-400">
                 {percentage}%
