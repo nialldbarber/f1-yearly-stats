@@ -14,6 +14,8 @@ import { F } from 'ts-toolbelt'
 import { z } from 'zod'
 import styles from '@/styles/Home.module.css'
 import { COUNTRIES_MAP } from '@/countries'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 type Season = number
 
@@ -86,12 +88,19 @@ function hasSeasonBegun(season: Driver[]) {
   )
 }
 
-const MAP_PRESENT: Record<string, string> = {
-  was: 'is',
+function formatName(name: string) {
+  return name.toLowerCase().replace(' ', '-')
 }
 
 const MAP_PAST: Record<string, string> = {
   is: 'was',
+}
+const formatTense = (year: any, word: string) => {
+  const currentYear = getYear()
+  if (year !== currentYear) {
+    return MAP_PAST[word]
+  }
+  return word
 }
 
 function isDriverRookie() {
@@ -124,10 +133,10 @@ const driverSchema = z.object({
   position: z.string(),
   wins: z.string(),
 })
-type Driver = z.infer<typeof driverSchema>
+export type Driver = z.infer<typeof driverSchema>
 
 const params = { limit: '100' }
-async function fetchF1Data(endpoint: string) {
+export async function fetchF1Data(endpoint: string) {
   try {
     const response = await axios.get(
       `${baseUrl}${endpoint}.json`,
@@ -214,7 +223,8 @@ const SeasonList = () => {
   )
 }
 
-type DriverRowStats = {
+export type DriverRowStats = {
+  driverId: Pick<Driver['Driver'], 'driverId'>
   position: Pick<Driver, 'position'>
   name: Pick<Driver['Driver'], 'givenName'> &
     Pick<Driver['Driver'], 'familyName'>
@@ -246,19 +256,22 @@ const columns = [
   }),
 ]
 
+export function Loading() {
+  return (
+    <div className="flex items-center justify-center h-screen w-screen">
+      <BarLoader color="#FFF" />
+    </div>
+  )
+}
+
 export default function Home() {
-  const [year, setYear] = useAtom(yearAtom)
+  const [year] = useAtom(yearAtom)
   const { data, isLoading, error } = useQuery({
     queryKey: ['drivers', year],
     queryFn: () => getDriverStandings(year),
   })
 
-  if (isLoading)
-    return (
-      <div className="flex items-center justify-center h-screen w-screen">
-        <BarLoader color="#FFF" />
-      </div>
-    )
+  if (isLoading) return <Loading />
   if (error)
     return (
       <p className="flex items-center justify-center h-screen w-screen text-9xl">
@@ -299,11 +312,12 @@ export const formatDriverRow = (driverRow: Driver[]) =>
   driverRow.map(
     ({
       position,
-      Driver: { givenName, familyName },
+      Driver: { driverId, givenName, familyName },
       Constructors,
       wins,
       points,
     }) => ({
+      driverId,
       position,
       name: `${givenName} ${familyName}`,
       team: Constructors[0]?.name,
@@ -368,14 +382,35 @@ const DriverRow = ({
             key={row.id}
             className={getClassName(index, hasBegun)}
           >
-            {row.getVisibleCells().map((cell) => (
-              <td key={cell.id}>
-                {flexRender(
-                  cell.column.columnDef.cell,
-                  cell.getContext()
-                )}
-              </td>
-            ))}
+            {row.getVisibleCells().map((cell) => {
+              console.log(cell.getContext())
+              const isDriver =
+                cell.getContext().column.id === 'name'
+              return isDriver ? (
+                <td key={cell.id}>
+                  <Link
+                    href={`/drivers/${formatName(
+                      `${
+                        cell.getContext().row.original
+                          .driverId
+                      }`
+                    )}`}
+                  >
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </Link>
+                </td>
+              ) : (
+                <td key={cell.id}>
+                  {flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext()
+                  )}
+                </td>
+              )
+            })}
           </tr>
         ))}
       </tbody>
@@ -387,20 +422,14 @@ const Title = ({ text }: { text: string }) => (
   <p className="text-xl font-bold">{text}</p>
 )
 
-const formatTense = (year: any, word: string) => {
-  const currentYear = getYear()
-  if (year === currentYear) {
-    return MAP_PRESENT[word]
-  }
-  return MAP_PAST[word]
-}
-
 export function SeasonStats({ data }: { data: Driver[] }) {
+  const [year] = useAtom(yearAtom)
   const { hasBegun } = useHasSeasonBegun(data)
   const { driver, winningPercentage } =
     calculateWinningPercentage(data)
   const { first, second, percentage } =
     calculateWinningMarginPercentage(data)
+
   return (
     hasBegun && (
       <div>
@@ -411,7 +440,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
               <li className="my-3">
                 <Title text="Winning Percentage" />
                 <i>{driver}s</i> winning percentage{' '}
-                {formatTense(yearAtom, 'is')}{' '}
+                {formatTense(year, 'is')}{' '}
                 <span className="text-red-400">
                   {winningPercentage}%
                 </span>
@@ -420,7 +449,7 @@ export function SeasonStats({ data }: { data: Driver[] }) {
             <li className="my-3">
               <Title text="Winning Margin" />
               <i>{first}s</i> winning margin over{' '}
-              <i>{second}</i> {formatTense(yearAtom, 'is')}{' '}
+              <i>{second}</i> {formatTense(year, 'is')}{' '}
               <span className="text-red-400">
                 {percentage}%
               </span>
