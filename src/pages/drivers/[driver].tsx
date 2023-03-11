@@ -70,7 +70,31 @@ const individualDriverSchema = z.object({
 })
 
 function driverWins() {
+  // const router = useRouter()
+  // const { driver } = router.query
+
+  // const [driverQuery, resultsQuery] = useQueries({
+  //   queries: [
+  //     {
+  //       queryKey: ['individual_driver', driver],
+  //       queryFn: () => getDriver(String(driver)),
+  //     },
+  //     {
+  //       queryKey: ['results', driver],
+  //       queryFn: () => getResults(String(driver)),
+  //     },
+  //   ],
+  // })
+  // var wins = 0
+  // for (let i = 0; i < resultsQuery.data.length; i++)
+  // {
+  //   if (resultsQuery.data[i].Results[0].position === "1")
+  //   {
+  //     wins += 1
+  //   }
+  // }
   return
+  // return wins
 }
 
 export default function Driver() {
@@ -98,9 +122,24 @@ export default function Driver() {
         Error! :((((
       </p>
     )
+    //------------------
+    var wins = 0
+    var poles = 0
+    var points = 0
+    var FastestLaps = 0
 
-  console.log(driverQuery.data)
-  console.log(resultsQuery.data)
+    for (let i = 0; i < resultsQuery.data.length; i++)
+    {
+      if (resultsQuery.data[i].Results[0].position === "1"){wins += 1}
+      if (resultsQuery.data[i].Results[0].grid === "1"){poles += 1}
+      // if (resultsQuery.data[i].Results[0].status !== "Withdrew")
+      // {
+      //   if (resultsQuery.data[i].Results[0].FastestLap.rank === "1"){FastestLaps += 1}
+      // }
+
+      points += parseInt(resultsQuery.data[i].Results[0].points)
+      console.log(resultsQuery.data[0].Results[0].points)
+    }
 
   return (
     <div>
@@ -108,6 +147,26 @@ export default function Driver() {
         {driverQuery.data.givenName}{' '}
         {driverQuery.data.familyName}
       </h1>
+      <br></br>
+      <table className="w-full border 0">
+        <tr>
+          <th>Wins</th>
+          <th>{wins}</th>
+        </tr>
+        <tr>
+          <th>Poles</th>
+          <th>{poles}</th>
+        </tr>
+        <tr>
+          <th>Fastest Laps</th>
+          <th>{FastestLaps}</th>
+        </tr>
+        <tr>
+          <th>Points</th>
+          <th>{points}</th>
+        </tr>
+      </table>
+
     </div>
   )
 }
