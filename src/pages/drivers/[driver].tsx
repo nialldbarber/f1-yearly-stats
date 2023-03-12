@@ -69,33 +69,104 @@ const individualDriverSchema = z.object({
   season: z.string(),
 })
 
-function driverWins() {
-  // const router = useRouter()
-  // const { driver } = router.query
+const resultsSchema = z.object({
+  Constructor: z.object({
+    constructorId: z.string(),
+    name: z.string(),
+    nationality: z.string(),
+  }),
+  Driver: z.object({
+    code: z.string(),
+    dateOfBirth: z.string(),
+    driverId: z.string(),
+    familyName: z.string(),
+    givenName: z.string(),
+    nationality: z.string(),
+    permanentNumber: z.string(),
+  }),
+  FastestLap: z.object({
+    lap: z.string(),
+    rank: z.string(),
+  }),
+  grid: z.string(),
+  laps: z.string(),
+  number: z.string(),
+  points: z.string(),
+  position: z.string(),
+  positionText: z.string(),
+  status: z.string(),
+})
 
-  // const [driverQuery, resultsQuery] = useQueries({
-  //   queries: [
-  //     {
-  //       queryKey: ['individual_driver', driver],
-  //       queryFn: () => getDriver(String(driver)),
-  //     },
-  //     {
-  //       queryKey: ['results', driver],
-  //       queryFn: () => getResults(String(driver)),
-  //     },
-  //   ],
-  // })
-  // var wins = 0
-  // for (let i = 0; i < resultsQuery.data.length; i++)
-  // {
-  //   if (resultsQuery.data[i].Results[0].position === "1")
-  //   {
-  //     wins += 1
-  //   }
-  // }
-  return
-  // return wins
+const racesSchema = z.object({
+  Circuit: z.object({
+    Location: z.object({
+      country: z.string(),
+      lat: z.string(),
+      locality: z.string(),
+      long: z.string(),
+    }),
+  }),
+  Results: z.array(resultsSchema),
+  date: z.string(),
+  raceName: z.string(),
+  round: z.string(),
+  season: z.string(),
+})
+
+
+
+
+
+
+
+
+type Races = z.infer<typeof racesSchema>
+type Kind = 'position' | 'grid'
+
+function getDriverStats(
+  results: Races[],
+  key: Kind,
+  value: number | string
+) {
+  return results?.reduce((total, current) => {
+    if (current?.Results[0][key] === value) {
+      total += 1
+    }
+    return total
+  }, 0)
 }
+
+type Races1 = z.infer<typeof racesSchema>
+type Kind1 = 'rank'
+type Kind2 = 'points'
+
+function getDriverStats1(
+  results: Races1[],
+  key: Kind1,
+  value: number | string
+) {
+  return results?.reduce((total, current) => {
+    if (current?.Results[0]['status'] != "Withdrew"){
+      if (current?.Results[0].FastestLap?.[key] === value) {
+        total += 1
+      }
+    }
+      return total
+    }, 0)
+  }
+
+function getDriverPoints(
+  results: Races[],
+  key: Kind2,
+  value: number | string
+) {
+  return results?.reduce((totally, current) => {
+      // if (current?.Results[0][key] === value) {
+        totally += parseInt(current?.Results[0][key])
+    // }
+      return totally
+    }, 0)
+  }
 
 export default function Driver() {
   const router = useRouter()
@@ -122,25 +193,31 @@ export default function Driver() {
         Error! :((((
       </p>
     )
-    //------------------
-    var wins = 0
-    var poles = 0
-    var points = 0
-    var FastestLaps = 0
 
-    for (let i = 0; i < resultsQuery.data.length; i++)
-    {
-      if (resultsQuery.data[i].Results[0].position === "1"){wins += 1}
-      if (resultsQuery.data[i].Results[0].grid === "1"){poles += 1}
-      // if (resultsQuery.data[i].Results[0].status !== "Withdrew")
-      // {
-      //   if (resultsQuery.data[i].Results[0].FastestLap.rank === "1"){FastestLaps += 1}
-      // }
+    const wins = getDriverStats(
+      resultsQuery.data,
+      'position',
+      '1'
+    )
 
-      points += parseInt(resultsQuery.data[i].Results[0].points)
-      console.log(resultsQuery.data[0].Results[0].points)
-    }
+    const poles = getDriverStats(
+      resultsQuery.data,
+      'grid',
+      '1'
+    )
 
+    const points = getDriverPoints(
+      resultsQuery.data,
+      'points',
+      '1'
+    )
+
+    const poles1 = getDriverStats1(
+      resultsQuery.data,
+      'rank',
+      '1'
+    )
+  // console.log(resultsQuery)
   return (
     <div>
       <h1 className="text-6xl text-center mt-8">
@@ -148,7 +225,8 @@ export default function Driver() {
         {driverQuery.data.familyName}
       </h1>
       <br></br>
-      <table className="w-full border 0">
+      {/* <thead> */}
+      <table  className="w-full relative">
         <tr>
           <th>Wins</th>
           <th>{wins}</th>
@@ -158,15 +236,17 @@ export default function Driver() {
           <th>{poles}</th>
         </tr>
         <tr>
-          <th>Fastest Laps</th>
-          <th>{FastestLaps}</th>
-        </tr>
-        <tr>
           <th>Points</th>
           <th>{points}</th>
         </tr>
+        <tr>
+          <th>Fastest Laps</th>
+          <th>{poles1}</th>
+        </tr>
       </table>
-
+      {/* </thead> */}
     </div>
   )
 }
+
+
