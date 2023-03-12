@@ -161,9 +161,7 @@ function getDriverPoints(
   value: number | string
 ) {
   return results?.reduce((totally, current) => {
-      // if (current?.Results[0][key] === value) {
         totally += parseInt(current?.Results[0][key])
-    // }
       return totally
     }, 0)
   }
@@ -194,30 +192,30 @@ export default function Driver() {
       </p>
     )
 
-    const wins = getDriverStats(
-      resultsQuery.data,
-      'position',
-      '1'
-    )
+  const wins = getDriverStats(
+    resultsQuery.data,
+    'position',
+    '1'
+  )
 
-    const poles = getDriverStats(
-      resultsQuery.data,
-      'grid',
-      '1'
-    )
+  const poles = getDriverStats(
+    resultsQuery.data,
+    'grid',
+    '1'
+  )
 
-    const points = getDriverPoints(
-      resultsQuery.data,
-      'points',
-      '1'
-    )
+  const points = getDriverPoints(
+    resultsQuery.data,
+    'points',
+    '1'
+  )
 
-    const poles1 = getDriverStats1(
-      resultsQuery.data,
-      'rank',
-      '1'
-    )
-  // console.log(resultsQuery)
+  const poles1 = getDriverStats1(
+    resultsQuery.data,
+    'rank',
+    '1'
+  )
+  console.log(resultsQuery)
   return (
     <div>
       <h1 className="text-6xl text-center mt-8">
@@ -225,28 +223,27 @@ export default function Driver() {
         {driverQuery.data.familyName}
       </h1>
       <br></br>
-      {/* <thead> */}
-      <table  className="w-full relative">
-        <tr>
-          <th>Wins</th>
-          <th>{wins}</th>
-        </tr>
-        <tr>
-          <th>Poles</th>
-          <th>{poles}</th>
-        </tr>
-        <tr>
-          <th>Points</th>
-          <th>{points}</th>
-        </tr>
-        <tr>
-          <th>Fastest Laps</th>
-          <th>{poles1}</th>
-        </tr>
-      </table>
-      {/* </thead> */}
+        <table className="w-6/12 text-center border-separate px-8 mx-auto">
+          <thead>
+            <tr>
+              <th>Wins</th>
+              <th>{wins}</th>
+            </tr>
+            <tr>
+              <th>Poles</th>
+              <th>{poles}</th>
+            </tr>
+            <tr>
+              <th>Points</th>
+              <th>{points}</th>
+            </tr>
+            <tr>
+              <th>Fastest Laps</th>
+              <th>{poles1}</th>
+            </tr>
+          </thead>
+        </table>
     </div>
   )
 }
-
 
