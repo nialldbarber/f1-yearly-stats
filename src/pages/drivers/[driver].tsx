@@ -113,15 +113,8 @@ const racesSchema = z.object({
   season: z.string(),
 })
 
-
-
-
-
-
-
-
 type Races = z.infer<typeof racesSchema>
-type Kind = 'position' | 'grid'
+type Kind = 'position' | 'grid' | 'points' | 'rank'
 
 function getDriverStats(
   results: Races[],
@@ -129,42 +122,24 @@ function getDriverStats(
   value: number | string
 ) {
   return results?.reduce((total, current) => {
-    if (current?.Results[0][key] === value) {
-      total += 1
+    if (key==='position' || key==='grid') {
+      if (current?.Results[0][key] === value) {
+          total += 1
+      }
+    }
+    else if (key==='rank'){
+      if (current?.Results[0]['status'] != "Withdrew"){
+        if (current?.Results[0].FastestLap?.[key] === value) {
+          total += 1
+        }
+    }
+  }
+    else {
+      total += parseInt(current?.Results[0][key])
     }
     return total
   }, 0)
 }
-
-type Races1 = z.infer<typeof racesSchema>
-type Kind1 = 'rank'
-type Kind2 = 'points'
-
-function getDriverStats1(
-  results: Races1[],
-  key: Kind1,
-  value: number | string
-) {
-  return results?.reduce((total, current) => {
-    if (current?.Results[0]['status'] != "Withdrew"){
-      if (current?.Results[0].FastestLap?.[key] === value) {
-        total += 1
-      }
-    }
-      return total
-    }, 0)
-  }
-
-function getDriverPoints(
-  results: Races[],
-  key: Kind2,
-  value: number | string
-) {
-  return results?.reduce((totally, current) => {
-        totally += parseInt(current?.Results[0][key])
-      return totally
-    }, 0)
-  }
 
 export default function Driver() {
   const router = useRouter()
@@ -204,13 +179,13 @@ export default function Driver() {
     '1'
   )
 
-  const points = getDriverPoints(
+  const points = getDriverStats(
     resultsQuery.data,
     'points',
     '1'
   )
 
-  const poles1 = getDriverStats1(
+  const poles1 = getDriverStats(
     resultsQuery.data,
     'rank',
     '1'
