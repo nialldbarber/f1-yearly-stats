@@ -167,30 +167,12 @@ export default function Driver() {
       </p>
     )
 
-  const wins = getDriverStats(
-    resultsQuery.data,
-    'position',
-    '1'
-  )
-
-  const poles = getDriverStats(
-    resultsQuery.data,
-    'grid',
-    '1'
-  )
-
-  const points = getDriverStats(
-    resultsQuery.data,
-    'points',
-    '1'
-  )
-
-  const poles1 = getDriverStats(
-    resultsQuery.data,
-    'rank',
-    '1'
-  )
-  console.log(resultsQuery)
+  const wins = getDriverStats(resultsQuery.data, 'position', '1')
+  const poles = getDriverStats(resultsQuery.data, 'grid', '1')
+  const points = getDriverStats(resultsQuery.data, 'points', '1')
+  const fastest_laps = getDriverStats(resultsQuery.data, 'rank', '1')
+  const percent_wins = wins/resultsQuery.data.length*100
+  console.log(resultsQuery.data[0].raceName)
   return (
     <div>
       <h1 className="text-6xl text-center mt-8">
@@ -214,7 +196,15 @@ export default function Driver() {
             </tr>
             <tr>
               <th>Fastest Laps</th>
-              <th>{poles1}</th>
+              <th>{fastest_laps}</th>
+            </tr>
+            <tr>
+              <th>Winning Percentage</th>
+              <th>{percent_wins.toFixed(2)}{'%'}</th>
+            </tr>
+            <tr>
+              <th>First Race</th>
+              <th>{resultsQuery.data[0].raceName}{' '}{resultsQuery.data[0].season}</th>
             </tr>
           </thead>
         </table>
